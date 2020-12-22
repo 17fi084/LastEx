@@ -1,0 +1,4 @@
+conda info --envs
+activate yolov3
+cd C:\Users\shotaro\keras-yolo3
+python Streaming.py
