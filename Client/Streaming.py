@@ -33,7 +33,7 @@ class YOLO(object):
         "gpu_num" : 1,
     }
 
-    label = "TEST"
+    label = "0"
     @classmethod
     def get_defaults(cls, n):
         if n in cls._defaults:
@@ -206,6 +206,7 @@ def detect_video(yolo, output_path=""):
         #何をどの精度で検出できたか?
         object_class = label.split(' ', 1)[0]
         accuracy = label.split(' ', 1)[-1]#[1]にするとエラーになる
+        accuracy = float(accuracy)
         return_value, frame = vid.read()
         image = Image.fromarray(frame)
         image = yolo.detect_image(image)
@@ -236,7 +237,7 @@ def detect_video(yolo, output_path=""):
         print(accuracy)
 
         #カメラに何かが映り、かつ確証度が0.8以上だった場合
-        if object_class == "person" & accuracy >= 0.80:
+        if object_class == "person" and accuracy >= 0.80:
             #カメラからの画像を一旦outputディレクトリに保存
             cv2.imwrite(r'C:\Users\shotaro\keras-yolo3\output\output.jpg', np.asarray(image)[..., ::-1])
         
