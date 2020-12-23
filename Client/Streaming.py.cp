@@ -20,9 +20,6 @@ from keras.utils import multi_gpu_model
 
 import cv2
 import requests
-label = "TEST"
-
-
 
 class YOLO(object):
 
@@ -36,6 +33,7 @@ class YOLO(object):
         "gpu_num" : 1,
     }
 
+    label = "0"
     @classmethod
     def get_defaults(cls, n):
         if n in cls._defaults:
@@ -145,10 +143,9 @@ class YOLO(object):
             box = out_boxes[i]
             score = out_scores[i]
 
-            global label
-            label = '{} {:.2f}'.format(predicted_class, score)
+            self.label = '{} {:.2f}'.format(predicted_class, score)
             draw = ImageDraw.Draw(image)
-            label_size = draw.textsize(label, font)
+            label_size = draw.textsize(self.label, font)
 
             top, left, bottom, right = box
             top = max(0, np.floor(top + 0.5).astype('int32'))
@@ -159,7 +156,7 @@ class YOLO(object):
             #book 0.32 (10, 27) (43, 47)
             #person 0.99 (0, 39) (211, 240)
             #print(label, (left, top), (right, bottom))
-            print(label)
+            #print(label)
 
             if top - label_size[1] >= 0:
                 text_origin = np.array([left, top - label_size[1]])
@@ -174,7 +171,7 @@ class YOLO(object):
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + label_size)],
                 fill=self.colors[c])
-            draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+            draw.text(text_origin, self.label, fill=(0, 0, 0), font=font)
             del draw
 
         end = timer()
@@ -183,9 +180,11 @@ class YOLO(object):
 
     def close_session(self):
         self.sess.close()
+    
+    def get_label(self):
+        return self.label
 
 def detect_video(yolo, output_path=""):
-    
     import cv2
     vid = cv2.VideoCapture("http://raspberrypi.local:8080/?action=stream")
     if not vid.isOpened():
@@ -203,6 +202,11 @@ def detect_video(yolo, output_path=""):
     fps = "FPS: ??"
     prev_time = timer()
     while True:
+        label = yolo.get_label()
+        #何をどの精度で検出できたか?それは画面のどこにあったか?
+        object_class = label.split(' ', 1)[0]
+        accuracy = label.split(' ', 1)[-1]#[1]にするとエラーになる
+        accuracy = float(accuracy)
         return_value, frame = vid.read()
         image = Image.fromarray(frame)
         image = yolo.detect_image(image)
@@ -229,22 +233,26 @@ def detect_video(yolo, output_path=""):
         #score = out_scores[i]
         #abel = '{} {:.2f}'.format(predicted_class, score)
         #print(label, (left, top), (right, bottom))
-        print(label)
-        #if predicted_class == "person":
+        print(object_class)
+        print(accuracy)
+
+
+        #カメラに何かが映り、かつ確証度が0.8以上だった場合
+        if object_class == "person" and accuracy >= 0.80:
             #カメラからの画像を一旦outputディレクトリに保存
-            #cv2.imwrite(r'C:\Users\shotaro\keras-yolo3\output\output.jpg', np.asarray(image)[..., ::-1])
+            cv2.imwrite(r'C:\Users\shotaro\keras-yolo3\output\output.jpg', np.asarray(image)[..., ::-1])
         
             #保存した画像をLINENotifyに送信
-            #line_notify_token = 'UA9zW1Nv5Z8miJgM6So10GZQEIqMXDC7MP9ZwWVLr22'
-            #line_notify_api = 'https://notify-api.line.me/api/notify'
-            #message = 'テスト通知'
+            line_notify_token = 'UA9zW1Nv5Z8miJgM6So10GZQEIqMXDC7MP9ZwWVLr22'
+            line_notify_api = 'https://notify-api.line.me/api/notify'
+            message = 'テスト通知'
 
             #バイナリファイルを開く
-            #payload = {'message': message}
-            #headers = {'Authorization': 'Bearer ' + line_notify_token}
-            #files = {'imageFile': open(r"C:\Users\shotaro\keras-yolo3\output\output.jpg", "rb")}
+            payload = {'message': message}
+            headers = {'Authorization': 'Bearer ' + line_notify_token}
+            files = {'imageFile': open(r"C:\Users\shotaro\keras-yolo3\output\output.jpg", "rb")}
 
-            #line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
+            line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
             #保存した画像をLINENotifyに送信(ここまで)
         
         

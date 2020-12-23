@@ -34,6 +34,7 @@ class YOLO(object):
     }
 
     label = "0"
+    grid = [0,0,0,0]
     @classmethod
     def get_defaults(cls, n):
         if n in cls._defaults:
@@ -152,6 +153,7 @@ class YOLO(object):
             left = max(0, np.floor(left + 0.5).astype('int32'))
             bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+            self.grid = [top,left,bottom,right]
             #clock 0.36 (214, 23) (239, 62)
             #book 0.32 (10, 27) (43, 47)
             #person 0.99 (0, 39) (211, 240)
@@ -184,6 +186,9 @@ class YOLO(object):
     def get_label(self):
         return self.label
 
+    def get_grid(self):
+        return self.grid
+
 def detect_video(yolo, output_path=""):
     import cv2
     vid = cv2.VideoCapture("http://raspberrypi.local:8080/?action=stream")
@@ -203,7 +208,8 @@ def detect_video(yolo, output_path=""):
     prev_time = timer()
     while True:
         label = yolo.get_label()
-        #何をどの精度で検出できたか?
+        grid = yolo.get_grid()
+        #何をどの精度で検出できたか?それは画面のどこにあったか?
         object_class = label.split(' ', 1)[0]
         accuracy = label.split(' ', 1)[-1]#[1]にするとエラーになる
         accuracy = float(accuracy)
@@ -235,6 +241,8 @@ def detect_video(yolo, output_path=""):
         #print(label, (left, top), (right, bottom))
         print(object_class)
         print(accuracy)
+        print(grid)
+
 
         #カメラに何かが映り、かつ確証度が0.8以上だった場合
         if object_class == "person" and accuracy >= 0.80:
