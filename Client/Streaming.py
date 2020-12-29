@@ -255,6 +255,8 @@ def detect_video(yolo, output_path=""):
         print(object_class)
         print(accuracy)
         print(grid)
+        print(image.width)
+        print(image.height)
         top=grid[0]
         bottom=grid[2]
         left=grid[1]
@@ -286,8 +288,8 @@ def detect_video(yolo, output_path=""):
             json_data["camera"]["grid"]["left"] = left
 
             #画像の中心点からのズレ
-            y = (255/2)-((bottom-top)/2)
-            x = (255/2)-((right-left)/2)
+            y = (320/2)-((bottom-top)/2)
+            x = (240/2)-((right-left)/2)
             json_data["camera"]["grid"]["X_Y"] = [x,y]
 
             #json_dataをbyte形式にしてからmsgに代入(Socketで送信するため)
