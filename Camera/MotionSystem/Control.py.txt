@@ -1,0 +1,5 @@
+conda info --envs
+activate yolov3
+D:
+cd D:\Cloud\Github\LastEx\Camera\新しいフォルダー
+python Control.py

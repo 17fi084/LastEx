@@ -1,0 +1,36 @@
+{
+    "camera": {
+        "detectdata":{
+            "object_class":"none",
+            "accuracy":0.00
+        },
+        "grid":{
+            "top": [
+                0,
+                0
+            ],
+            "bottom": [
+                0,
+                0
+            ],
+            "right": [
+                0,
+                0
+            ],
+            "left": [
+                0,
+                0
+            ],
+            "X_Y":[
+                0,
+                0
+            ]
+        }
+    },
+    "system_control":{
+        "servomotor":{
+            "pan":0,
+            "tilt":0
+        }
+    }
+}

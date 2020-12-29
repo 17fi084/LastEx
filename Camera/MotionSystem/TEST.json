@@ -1,0 +1,26 @@
+{
+    "camera": {
+        "top": [
+            0,
+            0
+        ],
+        "bottom": [
+            0,
+            0
+        ],
+        "right": [
+            0,
+            0
+        ],
+        "left": [
+            0,
+            0
+        ],
+        "pan":0,
+        "tilt":0
+    },
+    "SubData":{
+        "teststr":"0000",
+        "testval":-1
+    }
+}

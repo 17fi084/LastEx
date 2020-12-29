@@ -1,0 +1,5 @@
+conda info --envs
+activate yolov3
+D:
+cd D:\Cloud\Github\LastEx\Client
+python test_sending.py

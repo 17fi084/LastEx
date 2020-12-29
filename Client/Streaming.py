@@ -21,6 +21,16 @@ from keras.utils import multi_gpu_model
 import cv2
 import requests
 
+import socket
+import time
+import pickle
+import json
+
+#送信
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+#指定したIPアドレスとポートに接続要求
+s.connect((socket.gethostname(),8020))
+
 class YOLO(object):
 
     _defaults = {
@@ -213,6 +223,9 @@ def detect_video(yolo, output_path=""):
         object_class = label.split(' ', 1)[0]
         accuracy = label.split(' ', 1)[-1]#[1]にするとエラーになる
         accuracy = float(accuracy)
+        #object_class
+        #accuracy
+        #grid
         return_value, frame = vid.read()
         image = Image.fromarray(frame)
         image = yolo.detect_image(image)
@@ -242,17 +255,63 @@ def detect_video(yolo, output_path=""):
         print(object_class)
         print(accuracy)
         print(grid)
+        top=grid[0]
+        bottom=grid[2]
+        left=grid[1]
+        right=grid[3]
 
-
-        #カメラに何かが映り、かつ確証度が0.8以上だった場合
-        if object_class == "person" and accuracy >= 0.80:
+        #カメラに何かが映り、かつ確証度が0.5以上だった場合
+        if object_class == "person" and accuracy >= 0.50:
             #カメラからの画像を一旦outputディレクトリに保存
             cv2.imwrite(r'C:\Users\shotaro\keras-yolo3\output\output.jpg', np.asarray(image)[..., ::-1])
-        
+
+            #処理データをカメラに送信する処理
+            
+            #jsonファイルを取得する
+            file = open("Camera_data.json", 'r')
+            #JSON形式を辞書型に変換
+            json_data = json.load(file)
+            #jsonファイルの読み出し(ここまで)
+
+
+            #jsonファイルの編集(処理したデータを書き込んで送信の準備をする)
+            #画像の種類と各照度
+            json_data["camera"]["detectdata"]["object_class"]=object_class
+            json_data["camera"]["detectdata"]["accuracy"]=accuracy
+
+            #画像の位置
+            json_data["camera"]["grid"]["top"] = top
+            json_data["camera"]["grid"]["bottom"] = bottom
+            json_data["camera"]["grid"]["right"] = right
+            json_data["camera"]["grid"]["left"] = left
+
+            #画像の中心点からのズレ
+            y = (255/2)-((bottom-top)/2)
+            x = (255/2)-((right-left)/2)
+            json_data["camera"]["grid"]["X_Y"] = [x,y]
+
+            #json_dataをbyte形式にしてからmsgに代入(Socketで送信するため)
+            msg=pickle.dumps(json_data)
+
+            #デバッグコード
+            print("json_data=")
+            print(type(json_data))
+            print("msg=")
+            print(type(msg))
+            #デバッグコード(ここまで)
+
+            #clientsocket,address=s.accept()
+            #s.connect(('127.0.0.1', 50007))
+            #Socketでデータ送信
+            print("送信データ=")
+            print(type(msg))
+            s.sendall(msg)
+            #カメラに方向データの入ったjsonデータを送信
+
             #保存した画像をLINENotifyに送信
             line_notify_token = 'UA9zW1Nv5Z8miJgM6So10GZQEIqMXDC7MP9ZwWVLr22'
             line_notify_api = 'https://notify-api.line.me/api/notify'
-            message = 'テスト通知'
+            message = '上下左右の位置:top={} bottom={} left={} right={} X_Y={},{}'.format(top,bottom,left,right,x,y)
 
             #バイナリファイルを開く
             payload = {'message': message}
@@ -261,8 +320,7 @@ def detect_video(yolo, output_path=""):
 
             line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
             #保存した画像をLINENotifyに送信(ここまで)
-        
-        
+
         if isOutput:
             out.write(result)
         if cv2.waitKey(1) & 0xFF == ord('q'):
