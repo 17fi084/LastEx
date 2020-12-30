@@ -29,7 +29,8 @@ import json
 #送信
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 #指定したIPアドレスとポートに接続要求
-s.connect((socket.gethostname(),8020))
+#s.connect((socket.gethostname(),8020))
+s.connect(("192.168.1.66",8020))
 
 class YOLO(object):
 
@@ -288,9 +289,10 @@ def detect_video(yolo, output_path=""):
             json_data["camera"]["grid"]["left"] = left
 
             #画像の中心点からのズレ
-            y = (320/2)-((bottom-top)/2)
-            x = (240/2)-((right-left)/2)
-            json_data["camera"]["grid"]["X_Y"] = [x,y]
+            x = ((right-left)/2+left)-(image.width/2)
+            y = ((bottom-top)/2+top)-(image.height/2)
+            json_data["camera"]["grid"]["point_X"] = x
+            json_data["camera"]["grid"]["point_Y"] = y
 
             #json_dataをbyte形式にしてからmsgに代入(Socketで送信するため)
             msg=pickle.dumps(json_data)
@@ -361,3 +363,14 @@ def detect_stream(yolo):
 
 if __name__ == '__main__':
     detect_video(YOLO())
+
+
+"""
+コード
+conda info --envs
+activate yolov3
+D:
+cd D:\Cloud\Github\LastEx\Client
+python Streaming.py
+
+"""

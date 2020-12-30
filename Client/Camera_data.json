@@ -21,10 +21,8 @@
                 0,
                 0
             ],
-            "X_Y":[
-                0,
-                0
-            ]
+            "point_X":0,
+            "point_Y":0
         }
     },
     "system_control":{
