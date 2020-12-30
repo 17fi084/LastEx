@@ -263,6 +263,12 @@ def detect_video(yolo, output_path=""):
         left=grid[1]
         right=grid[3]
 
+        #jsonファイルを取得する
+        file = open("Camera_data.json", 'r')
+        #JSON形式を辞書型に変換
+        json_data = json.load(file)
+        #jsonファイルの読み出し(ここまで)
+
         #カメラに何かが映り、かつ確証度が0.5以上だった場合
         if object_class == "person" and accuracy >= 0.50:
             #カメラからの画像を一旦outputディレクトリに保存
@@ -270,13 +276,6 @@ def detect_video(yolo, output_path=""):
 
             #処理データをカメラに送信する処理
             
-            #jsonファイルを取得する
-            file = open("Camera_data.json", 'r')
-            #JSON形式を辞書型に変換
-            json_data = json.load(file)
-            #jsonファイルの読み出し(ここまで)
-
-
             #jsonファイルの編集(処理したデータを書き込んで送信の準備をする)
             #画像の種類と各照度
             json_data["camera"]["detectdata"]["object_class"]=object_class
@@ -324,6 +323,12 @@ def detect_video(yolo, output_path=""):
 
             line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
             #保存した画像をLINENotifyに送信(ここまで)
+        else:
+            #追跡対象が映ってないぞぉ☆
+            #対象が移っていないため、画像の種類と確証度は[NONE,0]になる
+            json_data["camera"]["detectdata"]["object_class"]="NONE"
+            json_data["camera"]["detectdata"]["accuracy"]=0
+
 
         if isOutput:
             out.write(result)

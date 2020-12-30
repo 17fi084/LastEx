@@ -33,8 +33,8 @@ while True:
     tilt_minimum = -80
 
     with conn:
-        full_msg=b''
-        new_msg=True
+        #full_msg=b''
+        #new_msg=True
         while True:
             msg=conn.recv(1024)
             #print(type(msg))
@@ -43,12 +43,10 @@ while True:
             #print(d)
             json_data=d
 
+
             #データを受信してカメラを動かす!
             point_X=json_data["camera"]["grid"]["point_X"]
             point_Y=json_data["camera"]["grid"]["point_Y"]
-
-            print("point_X={}".format(point_X))
-            print("point_Y={}".format(point_Y))
 
             #画像の画面に対する位置によって、カメラの方向を変える
             if point_X < 0:
@@ -74,8 +72,15 @@ while True:
 
             pantilthat.pan(pan_current)
             pantilthat.tilt(tilt_current)
+            
+
+            #デバッグコード
+            print("point_X={}".format(point_X))
+            print("point_Y={}".format(point_Y))
             print("pan_current={}".format(pan_current))
             print("tilt_current={}".format(tilt_current))
+
+            print(json_data)
 
 
 """
