@@ -222,9 +222,7 @@ def detect_video(yolo, output_path=""):
         grid = yolo.get_grid()
         #何をどの精度で検出できたか?それは画面のどこにあったか?
         object_class = label.split(' ', 1)[0]
-        print(object_class)
         accuracy = label.split(' ', 1)[-1]#[1]にするとエラーになる
-        print(accuracy)
         accuracy = float(accuracy)
         #object_class
         #accuracy
@@ -306,7 +304,7 @@ def detect_video(yolo, output_path=""):
             headers = {'Authorization': 'Bearer ' + line_notify_token}
             files = {'imageFile': open(r"C:\Users\shotaro\keras-yolo3\output\output.jpg", "rb")}
 
-            #line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
+            line_notify = requests.post(line_notify_api, data=payload, headers=headers, files=files)
             #保存した画像をLINENotifyに送信(ここまで)
         else:
             #追跡対象が映ってないぞぉ☆
@@ -325,11 +323,14 @@ def detect_video(yolo, output_path=""):
         print(type(msg))
         #デバッグコード(ここまで)
 
+        #clientsocket,address=s.accept()
+        #s.connect(('127.0.0.1', 50007))
         #Socketでデータ送信
         print("送信データ=")
         print(type(msg))
         s.sendall(msg)
         #カメラに方向データの入ったjsonデータを送信
+
 
         if isOutput:
             out.write(result)

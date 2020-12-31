@@ -43,7 +43,7 @@ while True:
             #print(d)
             json_data=d
 
-
+            #if json_data["camera"]["detectdata"]["object_class"] = "NONE":
             #データを受信してカメラを動かす!
             point_X=json_data["camera"]["grid"]["point_X"]
             point_Y=json_data["camera"]["grid"]["point_Y"]
